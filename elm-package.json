@@ -1,12 +1,12 @@
 {
-    "version": "1.0.0",
+    "version": "0.0.1",
     "summary": "typed layers over standard elm containers",
     "repository": "https://github.com/bburdette/typed-collections.git",
     "license": "BSD3",
     "source-directories": [
         "src"
     ],
-    "exposed-modules": [],
+    "exposed-modules": ["TDict", "TSet"],
     "dependencies": {
         "elm-lang/core": "5.1.1 <= v < 6.0.0"
     },

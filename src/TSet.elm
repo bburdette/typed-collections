@@ -1,4 +1,24 @@
-module TSet exposing (..)
+module TSet
+    exposing
+        ( TSet
+        , clear
+        , diff
+        , empty
+        , filter
+        , foldl
+        , foldr
+        , insert
+        , insertList
+        , intersect
+        , isEmpty
+        , mapInto
+        , member
+        , partition
+        , remove
+        , size
+        , toList
+        , union
+        )
 
 {-| A set of unique values. Unlike in the elm Set, the elements can be any type that can be converted to an elm 'comparable'.
 
@@ -23,12 +43,12 @@ Insert, remove, and query operations all take _O(log n)_ time.
 
 # Sets
 
-@docs Set
+@docs TSet
 
 
 # Build
 
-@docs empty, insert, insertList, remove
+@docs empty, clear, insert, insertList, remove
 
 
 # Query

@@ -1,4 +1,29 @@
-module TDict exposing (..)
+module TDict
+    exposing
+        ( TDict
+        , clear
+        , diff
+        , empty
+        , filter
+        , foldl
+        , foldr
+        , get
+        , insert
+        , insertList
+        , intersect
+        , isEmpty
+        , keys
+        , map
+        , member
+        , merge
+        , partition
+        , remove
+        , size
+        , toList
+        , union
+        , update
+        , values
+        )
 
 {-| A dictionary mapping unique keys to values. Unlike in the elm Dict, the elements can be any type that can be converted to an elm 'comparable'.
 
@@ -20,12 +45,12 @@ TDict.insert ((TagId 1), "some string of interest") emptyCustomerDict
 
 # Dictionaries
 
-@docs Dict
+@docs TDict
 
 
 # Build
 
-@docs empty, insert, update, remove
+@docs empty, clear, insert, update, remove
 
 
 # Query

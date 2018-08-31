@@ -1,23 +1,108 @@
 module TDict exposing (..)
 
+{-| A dictionary mapping unique keys to values. The keys can be any comparable
+type. This includes `Int`, `Float`, `Time`, `Char`, `String`, and tuples or
+lists of comparable types.
+
+Insert, remove, and query operations all take _O(log n)_ time.
+
+
+# Dictionaries
+
+@docs Dict
+
+
+# Build
+
+@docs empty, singleton, insert, update, remove
+
+
+# Query
+
+@docs isEmpty, member, get, size
+
+
+# Lists
+
+@docs keys, values, toList, fromList
+
+
+# Transform
+
+@docs map, foldl, foldr, filter, partition
+
+
+# Combine
+
+@docs union, intersect, diff, merge
+
+-}
+
 import Dict exposing (Dict)
 
 
+{-| A dictionary of keys and values. So a `(Dict String User)` is a dictionary
+that lets you look up a `String` (such as user names) and find the associated
+`User`.
+-}
 type TDict k comparable val
     = TDict
         { keyToComparable : k -> comparable
+        , comparableToKey : comparable -> k
         , dict : Dict comparable val
         }
 
 
-empty : (k -> comparable) -> TDict k comparable val
-empty kfn =
+{-| Create an empty dictionary.
+-}
+empty : (k -> comparable) -> (comparable -> k) -> TDict k comparable val
+empty k2c c2k =
     TDict
-        { keyToComparable = kfn
+        { keyToComparable = k2c
+        , comparableToKey = c2k
         , dict = Dict.empty
         }
 
 
+{-| Get the value associated with a key. If the key is not found, return
+`Nothing`. This is useful when you are not sure if a key will be in the
+dictionary.
+
+    animals = fromList [ ("Tom", Cat), ("Jerry", Mouse) ]
+
+    get "Tom"   animals == Just Cat
+    get "Jerry" animals == Just Mouse
+    get "Spike" animals == Nothing
+
+-}
+get : k -> TDict k comparable v -> Maybe v
+get key (TDict dict) =
+    Dict.get (dict.keyToComparable key) dict.dict
+
+
+{-| Determine if a key is in a dictionary.
+-}
+member : k -> TDict k comparable v -> Bool
+member key (TDict dict) =
+    Dict.member (dict.keyToComparable key) dict.dict
+
+
+{-| Determine the number of key-value pairs in the dictionary.
+-}
+size : TDict k comparable v -> Int
+size (TDict td) =
+    Dict.size td.dict
+
+
+{-| Determine if a dictionary is empty.
+-}
+isEmpty : TDict k comparable val -> Bool
+isEmpty (TDict dict) =
+    Dict.isEmpty dict.dict
+
+
+{-| Remove all elements from the TDict
+-}
 clear : TDict k comparable val -> TDict k comparable val
 clear (TDict td) =
     TDict
@@ -26,8 +111,22 @@ clear (TDict td) =
         }
 
 
-insertList : List ( k, v ) -> TDict k comparable v -> TDict k comparable v
-insertList kvs (TDict dict) =
+{-| Insert a key-value pair into a dictionary. Replaces value when there is
+a collision.
+-}
+insert : k -> v -> TDict k comparable v -> TDict k comparable v
+insert key val (TDict dict) =
+    TDict
+        { dict
+            | dict =
+                Dict.insert (dict.keyToComparable key) val dict.dict
+        }
+
+
+{-| Merge an association list into a dictionary.
+-}
+insertList : TDict k comparable v -> List ( k, v ) -> TDict k comparable v
+insertList (TDict dict) kvs =
     TDict
         { dict
             | dict =
@@ -40,15 +139,9 @@ insertList kvs (TDict dict) =
         }
 
 
-insert : k -> v -> TDict k comparable v -> TDict k comparable v
-insert key val (TDict dict) =
-    TDict
-        { dict
-            | dict =
-                Dict.insert (dict.keyToComparable key) val dict.dict
-        }
-
-
+{-| Remove a key-value pair from a dictionary. If the key is not found,
+no changes are made.
+-}
 remove : k -> TDict k comparable val -> TDict k comparable val
 remove key (TDict dict) =
     TDict
@@ -58,16 +151,107 @@ remove key (TDict dict) =
         }
 
 
-get : k -> TDict k comparable v -> Maybe v
-get key (TDict dict) =
-    Dict.get (dict.keyToComparable key) dict.dict
+{-| Update the value of a dictionary for a specific key with a given function.
+-}
+update : k -> (Maybe v -> Maybe v) -> TDict k comparable v -> TDict k comparable v
+update k alter (TDict td) =
+    TDict { td | dict = Dict.update (td.keyToComparable k) alter td.dict }
 
 
-member : k -> TDict k comparable v -> Bool
-member key (TDict dict) =
-    Dict.member (dict.keyToComparable key) dict.dict
+{-| Combine two dictionaries. If there is a collision, preference is given
+to the first dictionary.
+-}
+union : TDict k comparable v -> TDict k comparable v -> TDict k comparable v
+union (TDict t1) (TDict t2) =
+    TDict { t1 | dict = Dict.union t1.dict t2.dict }
 
 
-isEmpty : TDict k comparable val -> Bool
-isEmpty (TDict dict) =
-    Dict.isEmpty dict.dict
+{-| Keep a key-value pair when its key appears in the second dictionary.
+Preference is given to values in the first dictionary.
+-}
+intersect : TDict k comparable v -> TDict k comparable v -> TDict k comparable v
+intersect (TDict t1) (TDict t2) =
+    TDict { t1 | dict = Dict.intersect t1.dict t2.dict }
+
+
+{-| Keep a key-value pair when its key does not appear in the second dictionary.
+-}
+diff : TDict k comparable v -> TDict k comparable v -> TDict k comparable v
+diff (TDict t1) (TDict t2) =
+    TDict { t1 | dict = Dict.diff t1.dict t2.dict }
+
+
+
+---------------------------------------------
+
+
+{-| Apply a function to all values in a dictionary.
+-}
+map : (k -> a -> b) -> TDict k comparable a -> TDict k comparable b
+map f (TDict td) =
+    TDict { td | dict = Dict.map (\c v -> f (td.comparableToKey c) v) td.dict }
+
+
+{-| Fold over the key-value pairs in a dictionary, in order from lowest
+key to highest key.
+-}
+foldl : (k -> v -> b -> b) -> b -> TDict k comparable v -> b
+foldl f acc (TDict td) =
+    Dict.foldl (\c v a -> f (td.comparableToKey c) v a) acc td.dict
+
+
+{-| Fold over the key-value pairs in a dictionary, in order from highest
+key to lowest key.
+-}
+foldr : (k -> v -> b -> b) -> b -> TDict k comparable v -> b
+foldr f acc (TDict td) =
+    Dict.foldr (\c v a -> f (td.comparableToKey c) v a) acc td.dict
+
+
+{-| Keep a key-value pair when it satisfies a predicate.
+-}
+filter : (k -> v -> Bool) -> TDict k comparable v -> TDict k comparable v
+filter predicate (TDict td) =
+    TDict { td | dict = Dict.filter (\c v -> predicate (td.comparableToKey c) v) td.dict }
+
+
+{-| Partition a dictionary according to a predicate. The first dictionary
+contains all key-value pairs which satisfy the predicate, and the second
+contains the rest.
+-}
+partition : (k -> v -> Bool) -> TDict k comparable v -> ( TDict k comparable v, TDict k comparable v )
+partition predicate (TDict td) =
+    let
+        ( l, r ) =
+            Dict.partition (\c v -> predicate (td.comparableToKey c) v) td.dict
+    in
+    ( TDict { td | dict = l }
+    , TDict { td | dict = r }
+    )
+
+
+{-| Get all of the keys in a dictionary, sorted from lowest to highest.
+
+    keys (fromList [(0,"Alice"),(1,"Bob")]) == [0,1]
+
+-}
+keys : TDict k comparable v -> List k
+keys (TDict td) =
+    List.map td.comparableToKey (Dict.keys td.dict)
+
+
+{-| Get all of the values in a dictionary, in the order of their keys.
+
+    values (fromList [(0,"Alice"),(1,"Bob")]) == ["Alice", "Bob"]
+
+-}
+values : TDict k comparable v -> List v
+values (TDict td) =
+    Dict.values td.dict
+
+
+{-| Convert a dictionary into an association list of key-value pairs, sorted by keys.
+-}
+toList : TDict k comparable v -> List ( k, v )
+toList td =
+    foldr (\k value list -> ( k, value ) :: list) [] td

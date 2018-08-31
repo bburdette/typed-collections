@@ -24,10 +24,8 @@ module TSet
 
 This is helpful if you have values that are really just a comparable underneath, but you want to keep them separate using the type system. For instance
 
-type Kilos =
-Kilos Float
-type Pounds =
-Pounds Float
+type Kilos = Kilos Float
+type Pounds = Pounds Float
 
 Create a TSet with the empty function, which takes two converter functions as arguments.
 It can be convenient to create a canonical empty TSet for a certain type:

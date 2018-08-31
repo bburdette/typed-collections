@@ -1,6 +1,8 @@
 module TSet exposing (..)
 
-{-| A set of unique values. The values can be any type that can be converted to comparable. This is helpful if you have values that are really just a comparable underneath, but you want to keep them separateusing the type system. For instance
+{-| A set of unique values. Unlike in the elm Set, the elements can be any type that can be converted to an elm 'comparable'.
+
+This is helpful if you have values that are really just a comparable underneath, but you want to keep them separate using the type system. For instance
 
 type Kilos =
 Kilos Float

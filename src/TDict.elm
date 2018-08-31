@@ -1,10 +1,21 @@
 module TDict exposing (..)
 
-{-| A dictionary mapping unique keys to values. The keys can be any comparable
-type. This includes `Int`, `Float`, `Time`, `Char`, `String`, and tuples or
-lists of comparable types.
+{-| A dictionary mapping unique keys to values. Unlike in the elm Dict, the elements can be any type that can be converted to an elm 'comparable'.
 
-Insert, remove, and query operations all take _O(log n)_ time.
+This is helpful if you have values that are really just a comparable underneath, but you want to keep them separate using the type system. For instance
+
+type TagId = TagId Int
+
+type CustomerId = CustomerId Int
+
+emptyTagDict = TDict.empty ((TagId id) -> id) TagId String
+emptyCustomerDict = TDict.empty ((CustomerId id) -> id) CustomerId String
+
+So this works:
+TDict.insert ((TagId 1), "some string of interest") emptyTagDict
+
+But not this:
+TDict.insert ((TagId 1), "some string of interest") emptyCustomerDict
 
 
 # Dictionaries
@@ -14,7 +25,7 @@ Insert, remove, and query operations all take _O(log n)_ time.
 
 # Build
 
-@docs empty, singleton, insert, update, remove
+@docs empty, insert, update, remove
 
 
 # Query
@@ -24,7 +35,7 @@ Insert, remove, and query operations all take _O(log n)_ time.
 
 # Lists
 
-@docs keys, values, toList, fromList
+@docs keys, values, toList, insertList
 
 
 # Transform
@@ -67,13 +78,6 @@ empty k2c c2k =
 {-| Get the value associated with a key. If the key is not found, return
 `Nothing`. This is useful when you are not sure if a key will be in the
 dictionary.
-
-    animals = fromList [ ("Tom", Cat), ("Jerry", Mouse) ]
-
-    get "Tom"   animals == Just Cat
-    get "Jerry" animals == Just Mouse
-    get "Spike" animals == Nothing
-
 -}
 get : k -> TDict k comparable v -> Maybe v
 get key (TDict dict) =
@@ -181,8 +185,40 @@ diff (TDict t1) (TDict t2) =
     TDict { t1 | dict = Dict.diff t1.dict t2.dict }
 
 
+{-| The most general way of combining two dictionaries. You provide three
+accumulators for when a given key appears:
 
----------------------------------------------
+1.  Only in the left dictionary.
+2.  In both dictionaries.
+3.  Only in the right dictionary.
+
+You then traverse all the keys from lowest to highest, building up whatever
+you want.
+
+-}
+merge :
+    (k -> a -> result -> result)
+    -> (k -> a -> b -> result -> result)
+    -> (k -> b -> result -> result)
+    -> TDict k comparable a
+    -> TDict k comparable b
+    -> result
+    -> result
+merge leftStep bothStep rightStep leftDict rightDict initialResult =
+    let
+        (TDict tdl) =
+            leftDict
+
+        (TDict tdr) =
+            rightDict
+    in
+    Dict.merge
+        (\c a result -> leftStep (tdl.comparableToKey c) a result)
+        (\c a b result -> bothStep (tdl.comparableToKey c) a b result)
+        (\c b result -> rightStep (tdl.comparableToKey c) b result)
+        tdl.dict
+        tdr.dict
+        initialResult
 
 
 {-| Apply a function to all values in a dictionary.
@@ -231,9 +267,6 @@ partition predicate (TDict td) =
 
 
 {-| Get all of the keys in a dictionary, sorted from lowest to highest.
-
-    keys (fromList [(0,"Alice"),(1,"Bob")]) == [0,1]
-
 -}
 keys : TDict k comparable v -> List k
 keys (TDict td) =
@@ -241,9 +274,6 @@ keys (TDict td) =
 
 
 {-| Get all of the values in a dictionary, in the order of their keys.
-
-    values (fromList [(0,"Alice"),(1,"Bob")]) == ["Alice", "Bob"]
-
 -}
 values : TDict k comparable v -> List v
 values (TDict td) =

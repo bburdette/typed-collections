@@ -1,0 +1,16 @@
+{
+    "type": "package",
+    "name": "bburdette/typed-collections",
+    "summary": "typed layers over standard elm containers",
+    "license": "MIT",
+    "version": "1.0.0",
+    "exposed-modules": [
+        "TDict",
+        "TSet"
+    ],
+    "elm-version": "0.19.0 <= v < 0.19.1",
+    "dependencies": {
+        "elm/core": "1.0.0 <= v < 2.0.0"
+    },
+    "test-dependencies": {}
+}

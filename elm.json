@@ -1,29 +1,16 @@
 {
-    "version": "1.0.0",
     "type": "package",
-    "summary": "typed layers over standard elm containers",
     "name": "bburdette/typed-collections",
+    "summary": "typed layers over standard elm containers",
     "license": "MIT",
-    "exposed-modules": ["TDict", "TSet"],
-    "source-directories": [
-        "src"
+    "version": "1.0.0",
+    "exposed-modules": [
+        "TDict",
+        "TSet"
     ],
-    "elm-version": "0.19.0",
+    "elm-version": "0.19.0 <= v < 0.19.1",
     "dependencies": {
-        "direct": {
-            "elm/browser": "1.0.0",
-            "elm/core": "1.0.0",
-            "elm/html": "1.0.0"
-        },
-        "indirect": {
-            "elm/json": "1.0.0",
-            "elm/time": "1.0.0",
-            "elm/url": "1.0.0",
-            "elm/virtual-dom": "1.0.0"
-        }
+        "elm/core": "1.0.0 <= v < 2.0.0"
     },
-    "test-dependencies": {
-        "direct": {},
-        "indirect": {}
-    }
+    "test-dependencies": {}
 }

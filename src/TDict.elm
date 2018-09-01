@@ -250,7 +250,11 @@ merge leftStep bothStep rightStep leftDict rightDict initialResult =
 -}
 map : (k -> a -> b) -> TDict k comparable a -> TDict k comparable b
 map f (TDict td) =
-    TDict { td | dict = Dict.map (\c v -> f (td.comparableToKey c) v) td.dict }
+    TDict
+        { keyToComparable = td.keyToComparable
+        , comparableToKey = td.comparableToKey
+        , dict = Dict.map (\c v -> f (td.comparableToKey c) v) td.dict
+        }
 
 
 {-| Fold over the key-value pairs in a dictionary, in order from lowest

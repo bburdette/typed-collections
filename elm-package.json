@@ -1,5 +1,5 @@
 {
-    "version": "0.0.1",
+    "version": "1.0.0",
     "summary": "typed layers over standard elm containers",
     "repository": "https://github.com/bburdette/typed-collections.git",
     "license": "BSD3",

@@ -46,7 +46,7 @@ Insert, remove, and query operations all take _O(log n)_ time.
 
 # Build
 
-@docs empty, clear, insert, insertList, remove
+@docs empty, clear, insert, remove
 
 
 # Query

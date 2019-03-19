@@ -1,46 +1,35 @@
-module TDict
-    exposing
-        ( TDict
-        , clear
-        , diff
-        , empty
-        , filter
-        , foldl
-        , foldr
-        , get
-        , insert
-        , insertList
-        , intersect
-        , isEmpty
-        , keys
-        , map
-        , member
-        , merge
-        , partition
-        , remove
-        , size
-        , toList
-        , union
-        , update
-        , values
-        )
+module TDict exposing
+    ( TDict
+    , empty, clear, insert, update, remove
+    , isEmpty, member, get, size
+    , keys, values, toList, insertList
+    , map, foldl, foldr, filter, partition
+    , union, intersect, diff, merge
+    )
 
-{-| A dictionary mapping unique keys to values. Unlike in the elm Dict, the elements can be any type that can be converted to an elm 'comparable'.
+{-| A dictionary mapping unique keys to values. The keys can be any type that can be converted to an elm 'comparable'.
 
-This is helpful if you have values that are really just a comparable underneath, but you want to keep them separate using the type system. For instance
+This is helpful if you have keys that are really just a comparable underneath, but you want to keep them separate using the type system. For instance
 
-type TagId = TagId Int
+    type TagId
+        = TagId Int
 
-type CustomerId = CustomerId Int
+    type CustomerId
+        = CustomerId Int
 
-emptyTagDict = TDict.empty ((TagId id) -> id) TagId String
-emptyCustomerDict = TDict.empty ((CustomerId id) -> id) CustomerId String
+    emptyTagDict =
+        TDict.empty (\(TagId id) -> id) TagId String
 
-So this works:
-TDict.insert ((TagId 1), "some string of interest") emptyTagDict
+    emptyCustomerDict =
+        TDict.empty (\(CustomerId id) -> id) CustomerId String
 
-But not this:
-TDict.insert ((TagId 1), "some string of interest") emptyCustomerDict
+So inserting a (tag,string) into an emptyTagDict works:
+
+    TDict.insert ( TagId 1, "some string of interest" ) emptyTagDict
+
+But inserting a (tag,string) into an emptyCustomerDict doesn't:
+
+    TDict.insert ( TagId 1, "some string of interest" ) emptyCustomerDict
 
 
 # Dictionaries
@@ -77,9 +66,7 @@ TDict.insert ((TagId 1), "some string of interest") emptyCustomerDict
 import Dict exposing (Dict)
 
 
-{-| A dictionary of keys and values. So a `(Dict String User)` is a dictionary
-that lets you look up a `String` (such as user names) and find the associated
-`User`.
+{-| A dictionary of keys and values. Create a TDict with the `empty` function.
 -}
 type TDict k comparable val
     = TDict
@@ -89,7 +76,8 @@ type TDict k comparable val
         }
 
 
-{-| Create an empty dictionary.
+{-| Create an empty dictionary of keys and values. Requires two conversion functions:
+one from the key to comparable, and the other from comparable to key.
 -}
 empty : (k -> comparable) -> (comparable -> k) -> TDict k comparable val
 empty k2c c2k =

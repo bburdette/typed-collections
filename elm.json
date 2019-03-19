@@ -3,7 +3,7 @@
     "name": "bburdette/typed-collections",
     "summary": "typed layers over standard elm collections",
     "license": "MIT",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "exposed-modules": [
         "TDict",
         "TSet"
